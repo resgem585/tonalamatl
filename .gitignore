@@ -1,0 +1,81 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribuciones
+build/
+dist/
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# Virtualenv
+venv/
+.env/
+env/
+*.venv
+
+# Archivos de configuración de pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de dependencias
+poetry.lock
+Pipfile.lock
+
+# Archivos de caché y logs
+*.log
+*.cache
+*.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.coverage
+*.pycoverage
+
+# Configuración de editores y entornos de desarrollo
+.vscode/
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Configuración de Jupyter Notebook
+.ipynb_checkpoints/
+
+# Configuración de mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Archivos de bases de datos SQLite
+*.sqlite3
+*.db
+
+# Archivos de testing
+.tox/
+.nox/
+.pytest_cache/
+
+# Archivos de cobertura de código
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# Archivos de documentación
+docs/_build/
+
+# Archivos de CI/CD y despliegue
+*.pem
+*.crt
+*.key
+.envrc
+*.secrets
+*.json

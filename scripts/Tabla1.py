@@ -9,7 +9,6 @@ tonalpohualli_simbolos = [
     "COZCACUAUHTLI", "OLLIN", "TECPATL", "QUIAUITL", "XOCHITL"
 ]
 
-# Xiuhpohualli meses con fecha de inicio
 xiuhpohualli_meses = [
     ("ATLACAHUALO", "12/03"), ("TLACAXIPEHUALIZTLI", "01/04"), ("TOZOZTONTLI", "21/04"),
     ("UEY TOTZOZTLI", "11/05"), ("TOXCATL", "31/05"), ("ETZALQUALIZTLI", "20/06"),
@@ -19,7 +18,6 @@ xiuhpohualli_meses = [
     ("ATEMOZTLI", "06/01"), ("TITIL", "26/01"), ("IZCALLI", "15/02")
 ]
 
-# Nemontemi por tipo de año
 nemontemi = {
     "Tochtli": ["CIPACTLI", "EHECATL", "CALLI", "CUETZPALLI", "COATL"],
     "Acatl":   ["MIQUIZTLI", "MAZATL", "TOCHTLI", "ATL", "ITZCUINTLI"],
@@ -27,10 +25,8 @@ nemontemi = {
     "Calli":   ["COZCACUAUHTLI", "OLLIN", "TECPATL", "QUIAUITL", "XOCHITL"]
 }
 
-# Los 4 rumbos (en la secuencia normal de 13 días)
 rumbos = ["Tlahuiztlampa", "Huitztlampa", "Cihuatlampa", "Mictlampa"]
 
-# Rumbo FIJO para cada tipo de año en Nemontemi
 NEMONTEMI_RUMBO = {
     "Tochtli": "Tlahuiztlampa",
     "Acatl":   "Huitztlampa",
@@ -38,7 +34,7 @@ NEMONTEMI_RUMBO = {
     "Calli":   "Mictlampa"
 }
 
-# Acompañantes para cada número del 1 al 13
+# Acompañantes de 13 numeros (si ya lo tenías)
 ACOMPANANTES_13 = {
     1: {
         "acompanante_diurno": "Xiuhtecuhtli",
@@ -106,32 +102,129 @@ ACOMPANANTES_13 = {
         "acompanante_complementario": "Huehuecoyotl"
     }
 }
+# NUEVA SECCION: acompañantes de 20 días
+ACOMPANANTES_20_DIAS = [
+    {
+        "numero": 1,
+        "signo": "CIPACTLI",
+        "acompanante_diurno": "Tonacacihuatl y Tonacatecuhtli"
+    },
+    {
+        "numero": 2,
+        "signo": "EHECATL",
+        "acompanante_diurno": "Quetzalcóatl"
+    },
+    {
+        "numero": 3,
+        "signo": "CALLI",
+        "acompanante_diurno": "Tepeyólohtli"
+    },
+    {
+        "numero": 4,
+        "signo": "CUETZPALLI",
+        "acompanante_diurno": "Huehuecóyotl"
+    },
+    {
+        "numero": 5,
+        "signo": "COATL",
+        "acompanante_diurno": "Chalchiuhtlicue"
+    },
+    {
+        "numero": 6,
+        "signo": "MIQUIZTLI",
+        "acompanante_diurno": "Tecuziztecatl"
+    },
+    {
+        "numero": 7,
+        "signo": "MAZATL",
+        "acompanante_diurno": "Tlaloc"
+    },
+    {
+        "numero": 8,
+        "signo": "TOCHTLI",
+        "acompanante_diurno": "Meyahual"
+    },
+    {
+        "numero": 9,
+        "signo": "ATL",
+        "acompanante_diurno": "Xiuhtecuhtli"
+    },
+    {
+        "numero": 10,
+        "signo": "ITZCUINTLI",
+        "acompanante_diurno": "Mictlantecuhtli"
+    },
+    {
+        "numero": 11,
+        "signo": "OZOHMATLI",
+        "acompanante_diurno": "Xochipilli"
+    },
+    {
+        "numero": 12,
+        "signo": "MALINALLI",
+        "acompanante_diurno": "Patecatl"
+    },
+    {
+        "numero": 13,
+        "signo": "ACATL",
+        "acompanante_diurno": "Tezcatlipoca Ixquimilli"
+    },
+    {
+        "numero": 14,
+        "signo": "OCELOTL",
+        "acompanante_diurno": "Tlazolteotl"
+    },
+    {
+        "numero": 15,
+        "signo": "CUAUHTLI",
+        "acompanante_diurno": "Xipe Tótec"
+    },
+    {
+        "numero": 16,
+        "signo": "COZCACUAUHTLI",
+        "acompanante_diurno": "Itzpapalotl"
+    },
+    {
+        "numero": 17,
+        "signo": "OLLIN",
+        "acompanante_diurno": "Xólotl"
+    },
+    {
+        "numero": 18,
+        "signo": "TECPATL",
+        "acompanante_diurno": "Chalchiuhtotolin"
+    },
+    {
+        "numero": 19,
+        "signo": "QUIAUITL",
+        "acompanante_diurno": "Tonahtiuh"
+    },
+    {
+        "numero": 20,
+        "signo": "XOCHITL",
+        "acompanante_diurno": "Xochiquetzalli"
+    }
+]
 
 
 def generar_json_completo():
     calendario = {}
 
-    # Variables para la secuencia normal de 13 días
-    tonal_num = 1       # 1..13
-    tonal_index = 0     # índice para tonalpohualli_simbolos
-    rumbo_index = 0     # índice en [Tlahuiztlampa, Huitztlampa, Cihuatlampa, Mictlampa]
+    tonal_num = 1
+    tonal_index = 0
+    rumbo_index = 0
 
-    #
-    # 1) Generar los 360 días (18 veintenas)
-    #
+    # 1) Generar 360 días de las 18 veintenas
     for nombre_mes, fecha_inicio_str in xiuhpohualli_meses:
         dias_mes = []
-
-        # Ajusta el año base; se usará 2024 para todos por consistencia
         fecha_actual = datetime.strptime(fecha_inicio_str + "/2024", "%d/%m/%Y")
 
         for dia_num in range(1, 21):
             simbolo_actual = tonalpohualli_simbolos[tonal_index]
             rumbo_actual = rumbos[rumbo_index]
 
-            # Crear el registro del día
             dia_entrada = {
-                "numero": dia_num,                # 1..20 (dentro de la veintena)
+                "numero": dia_num,
                 "nombre": simbolo_actual,
                 "fecha": fecha_actual.strftime("%d/%m"),
                 "numero_tonal": tonal_num,
@@ -151,50 +244,43 @@ def generar_json_completo():
 
         calendario[nombre_mes] = dias_mes
 
-    #
-    # 2) Generar Nemontemi (7/03 al 11/03/2025)
-    #    Reiniciamos numero_tonal de 1 a 5, con rumbo fijo según tipo de año (Tochtli, Acatl, Tecpatl, Calli).
-    #
+    # 2) Generar Nemontemi
     calendario["NEMONTEMI"] = {}
     fecha_nemontemi_inicio = datetime.strptime("07/03/2025", "%d/%m/%Y")
 
     for tipo_anio, simbolos in nemontemi.items():
         dias_nemontemi = []
-        # Rumbo único para estos 5 días
         rumbo_fijo = NEMONTEMI_RUMBO[tipo_anio]
-
-        # Para cada uno de los 5 días en Nemontemi
         for i, simbolo in enumerate(simbolos):
             fecha_dia = fecha_nemontemi_inicio + timedelta(days=i)
-            # REINICIAMOS la cuenta del "numero_tonal" en 1..5
             dia_nem = {
-                "numero": i + 1,  # 1..5 (posición en Nemontemi)
+                "numero": i + 1,
                 "nombre": simbolo,
                 "fecha": fecha_dia.strftime("%d/%m"),
                 "numero_tonal": i + 1,
                 "rumbo": rumbo_fijo
             }
             dias_nemontemi.append(dia_nem)
-
         calendario["NEMONTEMI"][tipo_anio] = dias_nemontemi
 
-    #
-    # 3) Añadir la información de acompañantes (1..13)
-    #
-    #    Creamos una sección especial donde guardaremos
-    #    este bloque con la estructura que quieras:
-    #
-    acompanantes_lista = []
+    # 3) Acompañantes 13 (opcional)
+    acompanantes_13_lista = []
     for numero in range(1, 14):
-        data_num = ACOMPANANTES_13[numero]
-        acompanantes_lista.append({
+        data_num = ACOMPANANTES_13.get(numero, {
+            "acompanante_diurno": "Desconocido",
+            "acompanante_volador": "Desconocido",
+            "acompanante_complementario": "Desconocido"
+        })
+        acompanantes_13_lista.append({
             "numero": numero,
             "acompanante_diurno": data_num["acompanante_diurno"],
             "acompanante_volador": data_num["acompanante_volador"],
             "acompanante_complementario": data_num["acompanante_complementario"]
         })
+    calendario["ACOMPANANTES_TONALPOHUALLI"] = acompanantes_13_lista
 
-    calendario["ACOMPANANTES_TONALPOHUALLI"] = acompanantes_lista
+    # 4) Acompañantes de 20 días
+    calendario["ACOMPANANTES_20_DIAS"] = ACOMPANANTES_20_DIAS
 
     return calendario
 
@@ -207,4 +293,4 @@ def guardar_json(calendario, filename="calendario_xiuhpohualli.json"):
 if __name__ == "__main__":
     calendario_completo = generar_json_completo()
     guardar_json(calendario_completo)
-    print("Archivo JSON generado correctamente.")
+    print("\nArchivo JSON generado correctamente.")

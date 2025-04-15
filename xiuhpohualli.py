@@ -46,17 +46,19 @@ def find_nemontemi_day(calendario_nemontemi_data, tlalpilli, birth_date):
 
 
 def encontrar_inicios_de_trecenas(calendario_data):
-    """
-    Encuentra los inicios de las trecenas (cada 13 días). Retorna lista de:
-    (numero_tonal, nombre_signo, nombre_veintena, fecha)
-    """
     inicios = []
     for nombre_veintena, dias in calendario_data.items():
-        if nombre_veintena == "NEMONTEMI":
+        # Ignorar "NEMONTEMI" y "ACOMPANANTES_TONALPOHUALLI"
+        if nombre_veintena in ["NEMONTEMI", "ACOMPANANTES_TONALPOHUALLI"]:
             continue
+
         for i, dia in enumerate(dias):
+            # Aquí ya asumimos que 'dia' sí tiene "numero_tonal"
             if (dia["numero_tonal"] == 1) or (i % 13 == 0):
-                inicios.append((dia["numero_tonal"], dia["nombre"], nombre_veintena, dia["fecha"]))
+                inicios.append(
+                    (dia["numero_tonal"], dia["nombre"], nombre_veintena, dia["fecha"])
+                )
+
     return inicios
 
 
@@ -75,3 +77,6 @@ def encontrar_trecena_de_fecha(birth_date, calendario_data):
         if fecha_inicio_dt <= birth_date < fecha_siguiente_dt:
             return i + 1, tonal, signo, veintena, fecha_inicio
     return None
+
+
+

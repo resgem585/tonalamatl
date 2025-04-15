@@ -10,7 +10,6 @@ tonalpohualli_simbolos = [
 ]
 
 # Xiuhpohualli meses con fecha de inicio
-# (ejemplo: ATLACAHUALO 12/03/2024 hasta IZCALLI 06/03/2025)
 xiuhpohualli_meses = [
     ("ATLACAHUALO", "12/03"), ("TLACAXIPEHUALIZTLI", "01/04"), ("TOZOZTONTLI", "21/04"),
     ("UEY TOTZOZTLI", "11/05"), ("TOXCATL", "31/05"), ("ETZALQUALIZTLI", "20/06"),
@@ -39,6 +38,76 @@ NEMONTEMI_RUMBO = {
     "Calli":   "Mictlampa"
 }
 
+# Acompañantes para cada número del 1 al 13
+ACOMPANANTES_13 = {
+    1: {
+        "acompanante_diurno": "Xiuhtecuhtli",
+        "acompanante_volador": "Xiuhuitzitzilli",
+        "acompanante_complementario": "Tlahuizcalpantecuhtli"
+    },
+    2: {
+        "acompanante_diurno": "Tlaltecuhtli",
+        "acompanante_volador": "Quetzalhuitzitzilli",
+        "acompanante_complementario": "Ixtlilton"
+    },
+    3: {
+        "acompanante_diurno": "Chalchiuhtlicue",
+        "acompanante_volador": "Tohtli",
+        "acompanante_complementario": "Xochipilli"
+    },
+    4: {
+        "acompanante_diurno": "Tonatiuh",
+        "acompanante_volador": "Zollin",
+        "acompanante_complementario": "Xipe Totec"
+    },
+    5: {
+        "acompanante_diurno": "Tlazohteotl",
+        "acompanante_volador": "Cacalotl",
+        "acompanante_complementario": "Yaotl"
+    },
+    6: {
+        "acompanante_diurno": "Mictlantecuhtli",
+        "acompanante_volador": "Chicuauhtli",
+        "acompanante_complementario": "Huahuantli"
+    },
+    7: {
+        "acompanante_diurno": "Xochipilli",
+        "acompanante_volador": "Tizapapalotl",
+        "acompanante_complementario": "Xiuhtecuhtli"
+    },
+    8: {
+        "acompanante_diurno": "Tlaloc",
+        "acompanante_volador": "Itzcuauhtli",
+        "acompanante_complementario": "Tlaloc"
+    },
+    9: {
+        "acompanante_diurno": "Quetzalcoatl",
+        "acompanante_volador": "Huexolotl",
+        "acompanante_complementario": "Tlaloc"
+    },
+    10: {
+        "acompanante_diurno": "Tezcatlipoca",
+        "acompanante_volador": "Tecolotl",
+        "acompanante_complementario": "Tezcatlipoca"
+    },
+    11: {
+        "acompanante_diurno": "Chalmecatecuhtli",
+        "acompanante_volador": "Alotl",
+        "acompanante_complementario": "Xochipilli"
+    },
+    12: {
+        "acompanante_diurno": "Tlahuizcalpantecuhtli",
+        "acompanante_volador": "Quetzaltototl",
+        "acompanante_complementario": "Centeotl"
+    },
+    13: {
+        "acompanante_diurno": "Huehuecoyotl",
+        "acompanante_volador": "Tlapalpacholli",
+        "acompanante_complementario": "Huehuecoyotl"
+    }
+}
+
+
 def generar_json_completo():
     calendario = {}
 
@@ -53,7 +122,7 @@ def generar_json_completo():
     for nombre_mes, fecha_inicio_str in xiuhpohualli_meses:
         dias_mes = []
 
-        # Aquí fijamos el año base a 2024 y dejamos que los meses vayan corriendo
+        # Ajusta el año base; se usará 2024 para todos por consistencia
         fecha_actual = datetime.strptime(fecha_inicio_str + "/2024", "%d/%m/%Y")
 
         for dia_num in range(1, 21):
@@ -83,8 +152,8 @@ def generar_json_completo():
         calendario[nombre_mes] = dias_mes
 
     #
-    # 2) Generar Nemontemi (7/03 al 11/03):
-    #    Reiniciamos numero_tonal de 1 a 5, con rumbo fijo según tipo de año
+    # 2) Generar Nemontemi (7/03 al 11/03/2025)
+    #    Reiniciamos numero_tonal de 1 a 5, con rumbo fijo según tipo de año (Tochtli, Acatl, Tecpatl, Calli).
     #
     calendario["NEMONTEMI"] = {}
     fecha_nemontemi_inicio = datetime.strptime("07/03/2025", "%d/%m/%Y")
@@ -97,26 +166,45 @@ def generar_json_completo():
         # Para cada uno de los 5 días en Nemontemi
         for i, simbolo in enumerate(simbolos):
             fecha_dia = fecha_nemontemi_inicio + timedelta(days=i)
-
-            # Reiniciamos la cuenta del "numero_tonal" en 1..5
+            # REINICIAMOS la cuenta del "numero_tonal" en 1..5
             dia_nem = {
-                "numero": i + 1,                       # 1..5 (pos en Nemontemi)
+                "numero": i + 1,  # 1..5 (posición en Nemontemi)
                 "nombre": simbolo,
                 "fecha": fecha_dia.strftime("%d/%m"),
-                "numero_tonal": i + 1,                 # REINICIO 1..5
-                "rumbo": rumbo_fijo                    # Rumbo fijo
+                "numero_tonal": i + 1,
+                "rumbo": rumbo_fijo
             }
             dias_nemontemi.append(dia_nem)
 
         calendario["NEMONTEMI"][tipo_anio] = dias_nemontemi
 
+    #
+    # 3) Añadir la información de acompañantes (1..13)
+    #
+    #    Creamos una sección especial donde guardaremos
+    #    este bloque con la estructura que quieras:
+    #
+    acompanantes_lista = []
+    for numero in range(1, 14):
+        data_num = ACOMPANANTES_13[numero]
+        acompanantes_lista.append({
+            "numero": numero,
+            "acompanante_diurno": data_num["acompanante_diurno"],
+            "acompanante_volador": data_num["acompanante_volador"],
+            "acompanante_complementario": data_num["acompanante_complementario"]
+        })
+
+    calendario["ACOMPANANTES_TONALPOHUALLI"] = acompanantes_lista
+
     return calendario
+
 
 def guardar_json(calendario, filename="calendario_xiuhpohualli.json"):
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(calendario, file, indent=4, ensure_ascii=False)
 
+
 if __name__ == "__main__":
     calendario_completo = generar_json_completo()
     guardar_json(calendario_completo)
-    print("\nArchivo JSON generado correctamente (Nemontemi con numero_tonal 1..5).")
+    print("Archivo JSON generado correctamente.")

@@ -32,11 +32,15 @@ def find_nemontemi_day(calendario_nemontemi_data, tlalpilli, birth_date):
 
 def encontrar_inicios_de_trecenas(calendario_data):
     """
-    Encuentra los inicios de las trecenas (cada 13 días) dentro de las veintenas.
+    Encuentra los inicios reales de trecenas: cada 13 días continuos (rumbos).
     Retorna una lista de tuplas:
     (numero_tonal, nombre_signo, nombre_veintena, fecha_inicio)
     """
     inicios = []
+    contador_dias = 0
+
+    # Crear una lista lineal de todos los días válidos
+    dias_lineales = []
     for nombre_veintena, dias in calendario_data.items():
         if nombre_veintena in {
             "NEMONTEMI",
@@ -45,19 +49,19 @@ def encontrar_inicios_de_trecenas(calendario_data):
             "SENORES_9",
         }:
             continue
+        for dia in dias:
+            dias_lineales.append((dia, nombre_veintena))
 
-        for i, dia in enumerate(dias):
-            if "numero_tonal" not in dia:
-                continue
-            if dia["numero_tonal"] == 1 or (i % 13 == 0):
-                inicios.append((
-                    dia["numero_tonal"],
-                    dia["nombre"],
-                    nombre_veintena,
-                    dia["fecha"]
-                ))
+    for i, (dia, nombre_veintena) in enumerate(dias_lineales):
+        if i % 13 == 0:
+            inicios.append((
+                dia["numero_tonal"],
+                dia["nombre"],
+                nombre_veintena,
+                dia["fecha"]
+            ))
+
     return inicios
-
 
 
 def encontrar_trecena_de_fecha(birth_date, calendario_data):
@@ -78,13 +82,12 @@ def encontrar_trecena_de_fecha(birth_date, calendario_data):
 
 def obtener_senor_de_la_noche(calendario_data, birth_date):
     """
-    Devuelve (numero, nombre) del Señor de la Noche que rige el día dado.
-    • Se usan sólo los 360 días “regulares”; Nemontemi queda fuera.
-    • Los Señores (1‑9) se repiten cíclicamente.
+    Devuelve (número, nombre) del Señor de la Noche que rige el día dado.
+    • Se usan solo los 360 días “regulares”; los días Nemontemi quedan fuera.
+    • Los Señores (1‑9) se repiten de forma cíclica cada 9 días.
     """
     fecha_str = birth_date.strftime("%d/%m")
-    # Preparar lista de los 18 meses en orden
-    dia_absoluto = 0  # 0 ≡ Señor 1 (Xiuhtecuhtli)
+    dia_absoluto = 0  # Día 0 corresponde al Señor 1 (Xiuhtecuhtli)
 
     for nombre_mes, dias in calendario_data.items():
         if nombre_mes in {
@@ -93,13 +96,15 @@ def obtener_senor_de_la_noche(calendario_data, birth_date):
             "ACOMPANANTES_20_DIAS",
             "SENORES_9",
         }:
-            continue
+            continue  # Excluimos claves auxiliares
 
         for dia in dias:
             if dia["fecha"] == fecha_str:
+                # Calculamos el Señor de la Noche en base al día absoluto
                 num_senor = (dia_absoluto % 9) + 1
                 lista_senores = calendario_data["SENORES_9"]
                 senor = next(s for s in lista_senores if s["numero"] == num_senor)
                 return num_senor, senor["nombre"]
             dia_absoluto += 1
-    return None
+
+    return None  # Si no se encuentra la fecha

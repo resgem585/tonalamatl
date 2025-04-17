@@ -1,11 +1,19 @@
 from datetime import datetime
 
+EXTRAS = {
+    "NEMONTEMI",
+    "ACOMPANANTES_TONALPOHUALLI",
+    "ACOMPANANTES_20_DIAS",
+    "ACOMPANANTES_TRESCENAS",
+    "SENORES_9",
+}
+
 
 def find_xiuhpohualli_day(calendario_data, birth_date):
     fecha_str = birth_date.strftime("%d/%m")
 
     for nombre_veintena, dias_lista in calendario_data.items():
-        if nombre_veintena in ["NEMONTEMI", "ACOMPANANTES_TONALPOHUALLI", "ACOMPANANTES_20_DIAS"]:
+        if nombre_veintena in EXTRAS:
             continue
 
         for dia_info in dias_lista:
@@ -42,12 +50,7 @@ def encontrar_inicios_de_trecenas(calendario_data):
     # Crear una lista lineal de todos los días válidos
     dias_lineales = []
     for nombre_veintena, dias in calendario_data.items():
-        if nombre_veintena in {
-            "NEMONTEMI",
-            "ACOMPANANTES_TONALPOHUALLI",
-            "ACOMPANANTES_20_DIAS",
-            "SENORES_9",
-        }:
+        if nombre_veintena in EXTRAS:
             continue
         for dia in dias:
             dias_lineales.append((dia, nombre_veintena))
@@ -90,12 +93,7 @@ def obtener_senor_de_la_noche(calendario_data, birth_date):
     dia_absoluto = 0  # Día 0 corresponde al Señor 1 (Xiuhtecuhtli)
 
     for nombre_mes, dias in calendario_data.items():
-        if nombre_mes in {
-            "NEMONTEMI",
-            "ACOMPANANTES_TONALPOHUALLI",
-            "ACOMPANANTES_20_DIAS",
-            "SENORES_9",
-        }:
+        if nombre_mes in EXTRAS:
             continue  # Excluimos claves auxiliares
 
         for dia in dias:

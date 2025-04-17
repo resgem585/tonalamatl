@@ -5,7 +5,7 @@ from xiuhpohualli import (
     find_xiuhpohualli_day,
     find_nemontemi_day,
     encontrar_trecena_de_fecha,
-    obtener_senor_de_la_noche,  # 👈 nuevo import
+    obtener_senor_de_la_noche,
 )
 
 DAY_SIGNS_MAP = {
@@ -34,9 +34,9 @@ def main():
     # 3) Xiuhmolpilli
     año = find_xiuhmolpilli(xiuhmolpilli_data, birth_date)
     if año:
-        print(f"🌽  Año Xiuhmolpilli: {año[0]}  |  🌀 Tlalpilli: {año[1]}")
+        print(f"🌽  Año Xiuhmolpilli: {año[0]}  |  🌀 Tlalpilli: {año[1]}")
     else:
-        print("⚠️  Sin Tlalpilli para tu fecha.")
+        print("⚠️  Sin Tlalpilli para tu fecha.")
 
     # 4) Día Tonalpohualli / Nemontemi
     if (birth_date.month, birth_date.day) in [(3, d) for d in range(7, 12)] and año:
@@ -45,12 +45,14 @@ def main():
         res = find_xiuhpohualli_day(calendario, birth_date)
 
     if not res:
-        print("❌  Día Tonalpohualli no encontrado.")
+        print("❌  Día Tonalpohualli no encontrado.")
         return
 
     num_tonal, signo, veintena = res
     rumbo = next(
-        (d.get("rumbo") for d in calendario[veintena] if d["nombre"] == signo and d["numero_tonal"] == num_tonal),
+        (d.get("rumbo")
+         for d in calendario[veintena]
+         if d["nombre"] == signo and d["numero_tonal"] == num_tonal),
         None,
     )
 
@@ -65,12 +67,22 @@ def main():
     if senor:
         print(f"🌙  Señor de la Noche: #{senor[0]} {senor[1]}")
 
-    # 7) Trecena (sólo en días regulares)
+    # 7) Trecena (solo en días regulares)
     if veintena != "NEMONTEMI":
         trecena = encontrar_trecena_de_fecha(birth_date, calendario)
         if trecena:
             idx, tonal_i, signo_i, veintena_i, fecha_i = trecena
-            print(f"📍  Trecena #{idx}: inicia {tonal_i} {signo_i} ({fecha_i}) en {veintena_i}")
+            idx_ciclico = ((idx - 1) % 20) + 1
+            print(f"📍  Trecena #{idx_ciclico}: inicia {tonal_i} {signo_i} ({fecha_i}) en {veintena_i}")
+
+            # 7‑bis) Acompañantes de la trecena
+            acomp_trecena = next(
+                (x for x in calendario["ACOMPANANTES_TRESCENAS"] if x["numero"] == idx_ciclico),
+                None,
+            )
+            if acomp_trecena:
+                nombres = ", ".join(acomp_trecena["acompanantes"])
+                print(f"✨  Acompañantes de la trecena: {nombres}")
     else:
         print("🌌  Días Nemontemi (fuera de la cuenta regular)")
 
@@ -84,10 +96,12 @@ def main():
     acomp_tonal = next((x for x in calendario["ACOMPANANTES_TONALPOHUALLI"] if x["numero"] == num_tonal), None)
     if acomp_tonal:
         print(
-            f"🔹  Acompañantes tonal {num_tonal}: "
-            f"Diurno {acomp_tonal['acompanante_diurno']} • "
-            f"Volador {acomp_tonal['acompanante_volador']} • "
-            f"Complementario {acomp_tonal['acompanante_complementario']}"
+            "🔹  Acompañantes tonal {0}: Diurno {1} • Volador {2} • Complementario {3}".format(
+                num_tonal,
+                acomp_tonal["acompanante_diurno"],
+                acomp_tonal["acompanante_volador"],
+                acomp_tonal["acompanante_complementario"],
+            )
         )
 
 

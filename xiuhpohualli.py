@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 def find_xiuhpohualli_day(calendario_data, birth_date):
     fecha_str = birth_date.strftime("%d/%m")
 
@@ -61,3 +62,4 @@ def encontrar_trecena_de_fecha(birth_date, calendario_data):
         if fecha_inicio_dt <= birth_date < fecha_sig_dt:
             return (i + 1, tonal_i, signo_i, veintena_i, fecha_inicio)
     return None
+

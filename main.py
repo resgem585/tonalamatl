@@ -6,6 +6,7 @@ from xiuhpohualli import (
     find_nemontemi_day,
     encontrar_trecena_de_fecha,
     obtener_senor_de_la_noche,
+    obtener_rumbo,        # ← nuevo import
 )
 
 DAY_SIGNS_MAP = {
@@ -49,25 +50,30 @@ def main():
         return
 
     num_tonal, signo, veintena = res
-    rumbo = next(
-        (d.get("rumbo")
-         for d in calendario[veintena]
-         if d["nombre"] == signo and d["numero_tonal"] == num_tonal),
-        None,
-    )
 
-    # 5) Salida compacta del día
+    # 5) Rumbo
+    if veintena != "NEMONTEMI":
+        rumbo = obtener_rumbo(calendario, birth_date)
+    else:  # Nemontemi ya lleva rumbo en el JSON
+        rumbo = next(
+            (d["rumbo"]
+             for d in calendario["NEMONTEMI"][año[1]]
+             if d["fecha"] == birth_date.strftime("%d/%m")),
+            None,
+        )
+
+    # 6) Salida compacta del día
     linea_dia = f"🦅  {num_tonal} {signo}  |  🌿 {veintena}"
     if rumbo:
         linea_dia += f"  |  🧭 {rumbo}"
     print(linea_dia)
 
-    # 6) Señor de la Noche
+    # 7) Señor de la Noche
     senor = obtener_senor_de_la_noche(calendario, birth_date)
     if senor:
         print(f"🌙  Señor de la Noche: #{senor[0]} {senor[1]}")
 
-    # 7) Trecena (solo en días regulares)
+    # 8) Trecena (solo en días regulares)
     if veintena != "NEMONTEMI":
         trecena = encontrar_trecena_de_fecha(birth_date, calendario)
         if trecena:
@@ -75,7 +81,7 @@ def main():
             idx_ciclico = ((idx - 1) % 20) + 1
             print(f"📍  Trecena #{idx_ciclico}: inicia {tonal_i} {signo_i} ({fecha_i}) en {veintena_i}")
 
-            # 7‑bis) Acompañantes de la trecena
+            # 8‑bis) Acompañantes de la trecena
             acomp_trecena = next(
                 (x for x in calendario["ACOMPANANTES_TRESCENAS"] if x["numero"] == idx_ciclico),
                 None,
@@ -86,13 +92,13 @@ def main():
     else:
         print("🌌  Días Nemontemi (fuera de la cuenta regular)")
 
-    # 8) Acompañante diurno del signo
+    # 9) Acompañante diurno del signo
     num_signo = DAY_SIGNS_MAP.get(signo)
     acomp20 = next((x for x in calendario["ACOMPANANTES_20_DIAS"] if x["numero"] == num_signo), None)
     if acomp20:
         print(f"🔶  Acompañante diurno: {acomp20['acompanante_diurno']}")
 
-    # 9) Acompañantes del número tonal
+    # 10) Acompañantes del número tonal
     acomp_tonal = next((x for x in calendario["ACOMPANANTES_TONALPOHUALLI"] if x["numero"] == num_tonal), None)
     if acomp_tonal:
         print(

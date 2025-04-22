@@ -5,42 +5,26 @@ with open("calendario_base.json", encoding="utf-8") as f:
     base = json.load(f)
 
 
-def generar_json_completo():
+def generar_json_completo() -> dict:
     calendario = {}
 
+    # ── 1) Veintenas (360 días) sin número_tonal ni rumbo ───────
     tonal_num = 1
     tonal_index = 0
     rumbo_index = 0
 
-    tonalpohualli_simbolos = base["tonalpohualli_simbolos"]
-    xiuhpohualli_meses = base["xiuhpohualli_meses"]
+    signos = base["tonalpohualli_simbolos"]
+    xiuh_meses = base["xiuhpohualli_meses"]
     rumbos = base["rumbos"]
-    nemontemi = base["nemontemi"]
-    NEMONTEMI_RUMBO = base["NEMONTEMI_RUMBO"]
-    ACOMPANANTES_13 = base["ACOMPANANTES_13"]
-    ACOMPANANTES_20_DIAS = base["ACOMPANANTES_20_DIAS"]
-    SENORES_9 = base["SENORES_9"]
-    ACOMPANANTES_TRESCENAS = base["ACOMPANANTES_TRESCENAS"]  # <─ NUEVO
 
-    # 1) Generar 360 días de las 18 veintenas
-    for nombre_mes, fecha_inicio_str in xiuhpohualli_meses:
-        dias_mes = []
-        fecha_actual = datetime.strptime(fecha_inicio_str + "/2024", "%d/%m/%Y")
+    for mes, f_ini in xiuh_meses:
+        dias = []
+        fecha = datetime.strptime(f"{f_ini}/2024", "%d/%m/%Y")
 
-        for dia_num in range(1, 21):
-            simbolo_actual = tonalpohualli_simbolos[tonal_index]
-            rumbo_actual = rumbos[rumbo_index]
+        for d in range(1, 21):
+            dias.append({"numero": d, "nombre": signos[tonal_index], "fecha": fecha.strftime("%d/%m")})
 
-            dias_mes.append({
-                "numero": dia_num,
-                "nombre": simbolo_actual,
-                "fecha": fecha_actual.strftime("%d/%m"),
-                "numero_tonal": tonal_num,
-                "rumbo": rumbo_actual,
-            })
-
-            # Avanzar al siguiente día
-            fecha_actual += timedelta(days=1)
+            fecha += timedelta(days=1)
             tonal_index = (tonal_index + 1) % 20
             if tonal_num == 13:
                 tonal_num = 1
@@ -48,63 +32,52 @@ def generar_json_completo():
             else:
                 tonal_num += 1
 
-        calendario[nombre_mes] = dias_mes
+        calendario[mes] = dias
 
-    # 2) Nemontemi (5 días)
+    # ── 2) Nemontemi (5 días por tipo) sin número_tonal ni rumbo ─
     calendario["NEMONTEMI"] = {}
-    fecha_nemontemi_inicio = datetime.strptime("07/03/2025", "%d/%m/%Y")
-    for tipo_anio, simbolos in nemontemi.items():
-        dias_nemontemi = []
-        rumbo_fijo = NEMONTEMI_RUMBO[tipo_anio]
-        for i, simbolo in enumerate(simbolos):
-            fecha_dia = fecha_nemontemi_inicio + timedelta(days=i)
-            dias_nemontemi.append({
+    fecha_base = datetime.strptime("07/03/2025", "%d/%m/%Y")
+    for tipo, simbolos in base["nemontemi"].items():
+        calendario["NEMONTEMI"][tipo] = [
+            {
                 "numero": i + 1,
                 "nombre": simbolo,
-                "fecha": fecha_dia.strftime("%d/%m"),
-                "numero_tonal": i + 1,
-                "rumbo": rumbo_fijo,
-            })
-        calendario["NEMONTEMI"][tipo_anio] = dias_nemontemi
+                "fecha": (fecha_base + timedelta(days=i)).strftime("%d/%m"),
+            }
+            for i, simbolo in enumerate(simbolos)
+        ]
 
-    # 3) Acompañantes Tonalpohualli (13)
-    acompanantes_13_lista = []
-    for numero in range(1, 14):
-        data_num = ACOMPANANTES_13.get(str(numero), {
-            "acompanante_diurno": "Desconocido",
-            "acompanante_volador": "Desconocido",
-            "acompanante_complementario": "Desconocido",
-        })
-        acompanantes_13_lista.append({
-            "numero": numero,
-            "acompanante_diurno": data_num["acompanante_diurno"],
-            "acompanante_volador": data_num["acompanante_volador"],
-            "acompanante_complementario": data_num["acompanante_complementario"],
-        })
-    calendario["ACOMPANANTES_TONALPOHUALLI"] = acompanantes_13_lista
-
-    # 4) Acompañantes de las 20 trecenas (nuevo bloque)
-    acompanantes_trecenas = [
-        {"numero": item["trecena"], "acompanantes": item["acompanantes"]}
-        for item in ACOMPANANTES_TRESCENAS
+    # ── 3) Acompañantes Tonalpohualli (13) ──────────────────────
+    calendario["ACOMPANANTES_TONALPOHUALLI"] = [
+        {"numero": n, **base["ACOMPANANTES_13"][str(n)]} for n in range(1, 14)
     ]
-    calendario["ACOMPANANTES_TRESCENAS"] = acompanantes_trecenas
 
-    # 5) Acompañantes de 20 días
-    calendario["ACOMPANANTES_20_DIAS"] = ACOMPANANTES_20_DIAS
+    # ── 4) Acompañantes de trecenas (20) ─────────────────────────
+    calendario["ACOMPANANTES_TRESCENAS"] = [
+        {"numero": t["trecena"], "acompanantes": t["acompanantes"]}
+        for t in base["ACOMPANANTES_TRESCENAS"]
+    ]
 
-    # 6) Señores de la Noche (9)
-    calendario["SENORES_9"] = SENORES_9
+    # ── 5) Acompañantes de 20 signos & Señores de la Noche ──────
+    calendario["ACOMPANANTES_20_DIAS"] = base["ACOMPANANTES_20_DIAS"]
+    calendario["SENORES_9"] = base["SENORES_9"]
+
+    # ── 6) Listas clave‑valor de signos y números ───────────────
+    calendario["TONALPOHUALLI_SIMBOLOS"] = [
+        {"clave": i + 1, "valor": s} for i, s in enumerate(signos)
+    ]
+    calendario["numeros"] = [
+        {"clave": i + 1, "valor": n} for i, n in enumerate(base["numeros"])
+    ]
 
     return calendario
 
 
-def guardar_json(calendario, filename="calendario_completo.json"):
+def guardar_json(data: dict, filename="calendario_completo.json") -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        json.dump(calendario, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-    calendario_completo = generar_json_completo()
-    guardar_json(calendario_completo)
-    print("\nArchivo JSON generado correctamente.")
+    guardar_json(generar_json_completo())
+    print("✅  JSON generado: ‘numero_tonal’ y ‘rumbo’ eliminados también de Nemontemi.")

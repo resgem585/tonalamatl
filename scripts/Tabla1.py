@@ -62,12 +62,12 @@ def generar_json_completo() -> dict:
     calendario["ACOMPANANTES_20_DIAS"] = base["ACOMPANANTES_20_DIAS"]
     calendario["SENORES_9"] = base["SENORES_9"]
 
-    # ── 6) Listas clave‑valor de signos y números ───────────────
+    # ── 6) Listas nombre‑valor de signos y números ───────────────
     calendario["TONALPOHUALLI_SIMBOLOS"] = [
-        {"clave": i + 1, "valor": s} for i, s in enumerate(signos)
+        {"nombre": i + 1, "valor": s} for i, s in enumerate(signos)
     ]
     calendario["numeros"] = [
-        {"clave": i + 1, "valor": n} for i, n in enumerate(base["numeros"])
+        {"nombre": i + 1, "valor": n} for i, n in enumerate(base["numeros"])
     ]
 
     return calendario

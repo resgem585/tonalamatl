@@ -1,62 +1,115 @@
 import json
 from datetime import datetime
-
 from xiuhmolpilli import find_xiuhmolpilli
-from xiuhpohualli import find_xiuhpohualli_day, find_nemontemi_day
+from xiuhpohualli import (
+    find_xiuhpohualli_day,
+    find_nemontemi_day,
+    encontrar_trecena_de_fecha,
+    obtener_senor_de_la_noche,
+    obtener_rumbo,        # ← nuevo import
+)
+
+DAY_SIGNS_MAP = {
+    "CIPACTLI": 1, "EHECATL": 2, "CALLI": 3, "CUETZPALLI": 4, "COATL": 5,
+    "MIQUIZTLI": 6, "MAZATL": 7, "TOCHTLI": 8, "ATL": 9, "ITZCUINTLI": 10,
+    "OZOHMATLI": 11, "MALINALLI": 12, "ACATL": 13, "OCELOTL": 14, "CUAUHTLI": 15,
+    "COZCACUAUHTLI": 16, "OLLIN": 17, "TECPATL": 18, "QUIAUITL": 19, "XOCHITL": 20,
+}
+
 
 def main():
-    # 1) Cargar el JSON de los Años Xiuhmolpilli
-    with open("xiuhmolpilli.json", "r", encoding="utf-8") as f:
+    # 1) Cargar datos
+    with open("xiuhmolpilli.json", encoding="utf-8") as f:
         xiuhmolpilli_data = json.load(f)
+    with open("calendario_completo.json", encoding="utf-8") as f:
+        calendario = json.load(f)
 
-    # 2) Cargar el JSON del Tonalpohualli (días normales)
-    with open("calendario_xiuhpohualli.json", "r", encoding="utf-8") as f:
-        calendario_data = json.load(f)
-
-    # 3) Cargar el JSON especial para Nemontemi
-    with open("calendario_xiuhpohualli.json", "r", encoding="utf-8") as f:
-        calendario_nemontemi_data = json.load(f)
-
-    # 4) Pedir fecha de nacimiento
-    birth_str = input("Ingrese su fecha de nacimiento (DD/MM/YYYY): ").strip()
+    # 2) Fecha de nacimiento
+    birth_str = input("🗓️  Ingresa tu fecha de nacimiento (DD/MM/YYYY): ").strip()
     try:
         birth_date = datetime.strptime(birth_str, "%d/%m/%Y").date()
     except ValueError:
-        print("Formato inválido. Use DD/MM/YYYY. Ejemplo: 07/01/1989")
+        print("❌  Formato inválido, usa DD/MM/YYYY.")
         return
 
-    # 5) Determinar el Año Xiuhmolpilli y su Tlalpilli
-    year_result = find_xiuhmolpilli(xiuhmolpilli_data, birth_date)
-    if year_result is None:
-        print("No se encontró el Tlalpilli en el JSON de Xiuhmolpilli.")
-        # Si no hay año, de todos modos intentamos ver si hay día Tonalpohualli
-        tlalpilli = None
+    # 3) Xiuhmolpilli
+    año = find_xiuhmolpilli(xiuhmolpilli_data, birth_date)
+    if año:
+        print(f"🌽  Año Xiuhmolpilli: {año[0]}  |  🌀 Tlalpilli: {año[1]}")
     else:
-        name, tlalpilli = year_result
-        print(f"Tu año Xiuhmolpilli es: {name}, Tlalpilli: {tlalpilli}")
+        print("⚠️  Sin Tlalpilli para tu fecha.")
 
-    # 6) Verificar si la fecha está en el rango Nemontemi: 7 a 11 de marzo
-    #    Si sí, usamos el JSON especial (xiuhpohualli_nemontemi.json)
-    #    buscando en la sección "NEMONTEMI" con la clave = Tlalpilli (si existe).
-    day_result = None
-    if birth_date.month == 3 and 7 <= birth_date.day <= 11 and tlalpilli:
-        # Intentar obtener el día Nemontemi
-        day_result = find_nemontemi_day(calendario_nemontemi_data, tlalpilli, birth_date)
-
-        # Si no encontramos nada, day_result seguirá como None
-        if day_result is not None:
-            print("¡Estás en días Nemontemi!")
+    # 4) Día Tonalpohualli / Nemontemi
+    if (birth_date.month, birth_date.day) in [(3, d) for d in range(7, 12)] and año:
+        res = find_nemontemi_day(calendario, año[1], birth_date)
     else:
-        # 7) Caso normal: usar calendario_xiuhpohualli.json
-        day_result = find_xiuhpohualli_day(calendario_data, birth_date)
+        res = find_xiuhpohualli_day(calendario, birth_date)
 
-    # 8) Mostrar resultados del Tonalpohualli
-    if day_result is None:
-        print("No se encontró día Tonalpohualli para tu fecha en los archivos JSON.")
+    if not res:
+        print("❌  Día Tonalpohualli no encontrado.")
+        return
+
+    num_tonal, signo, veintena = res
+
+    # 5) Rumbo
+    if veintena != "NEMONTEMI":
+        rumbo = obtener_rumbo(calendario, birth_date)
+    else:  # Nemontemi ya lleva rumbo en el JSON
+        rumbo = next(
+            (d["rumbo"]
+             for d in calendario["NEMONTEMI"][año[1]]
+             if d["fecha"] == birth_date.strftime("%d/%m")),
+            None,
+        )
+
+    # 6) Salida compacta del día
+    linea_dia = f"🦅  {num_tonal} {signo}  |  🌿 {veintena}"
+    if rumbo:
+        linea_dia += f"  |  🧭 {rumbo}"
+    print(linea_dia)
+
+    # 7) Señor de la Noche
+    senor = obtener_senor_de_la_noche(calendario, birth_date)
+    if senor:
+        print(f"🌙  Señor de la Noche: #{senor[0]} {senor[1]}")
+
+    # 8) Trecena (solo en días regulares)
+    if veintena != "NEMONTEMI":
+        trecena = encontrar_trecena_de_fecha(birth_date, calendario)
+        if trecena:
+            idx, tonal_i, signo_i, veintena_i, fecha_i = trecena
+            idx_ciclico = ((idx - 1) % 20) + 1
+            print(f"📍  Trecena #{idx_ciclico}: inicia {tonal_i} {signo_i} ({fecha_i}) en {veintena_i}")
+
+            # 8‑bis) Acompañantes de la trecena
+            acomp_trecena = next(
+                (x for x in calendario["ACOMPANANTES_TRESCENAS"] if x["numero"] == idx_ciclico),
+                None,
+            )
+            if acomp_trecena:
+                nombres = ", ".join(acomp_trecena["acompanantes"])
+                print(f"✨  Acompañantes de la trecena: {nombres}")
     else:
-        numero_tonal, nombre_signo, nombre_mes = day_result
-        print(f"Tu día Tonalpohualli es: {numero_tonal} {nombre_signo}")
-        print(f"Nombre de la Veintena/Mes: {nombre_mes}")
+        print("🌌  Días Nemontemi (fuera de la cuenta regular)")
+
+    # 9) Acompañante diurno del signo
+    num_signo = DAY_SIGNS_MAP.get(signo)
+    acomp20 = next((x for x in calendario["ACOMPANANTES_20_DIAS"] if x["numero"] == num_signo), None)
+    if acomp20:
+        print(f"🔶  Acompañante diurno: {acomp20['acompanante_diurno']}")
+
+    # 10) Acompañantes del número tonal
+    acomp_tonal = next((x for x in calendario["ACOMPANANTES_TONALPOHUALLI"] if x["numero"] == num_tonal), None)
+    if acomp_tonal:
+        print(
+            "🔹  Acompañantes tonal {0}: Diurno {1} • Volador {2} • Complementario {3}".format(
+                num_tonal,
+                acomp_tonal["acompanante_diurno"],
+                acomp_tonal["acompanante_volador"],
+                acomp_tonal["acompanante_complementario"],
+            )
+        )
+
 
 if __name__ == "__main__":
     main()

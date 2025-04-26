@@ -13,6 +13,7 @@ EXTRAS = {
     "numeros",
 }
 
+
 # ──────────────────────────────
 #  Ayudas internas
 # ──────────────────────────────
@@ -31,10 +32,10 @@ def _es_lista_dias(item: Any) -> bool:
     True si `item` es lista de diccionarios con claves típicas de un día.
     """
     return (
-        isinstance(item, list)
-        and item
-        and isinstance(item[0], dict)
-        and {"nombre", "fecha"}.issubset(item[0].keys())
+            isinstance(item, list)
+            and item
+            and isinstance(item[0], dict)
+            and {"nombre", "fecha"}.issubset(item[0].keys())
     )
 
 
@@ -42,8 +43,8 @@ def _es_lista_dias(item: Any) -> bool:
 #  Día Xiuhpohualli / Tonalpohualli
 # ──────────────────────────────
 def find_xiuhpohualli_day(
-    calendario_data: Dict[str, Any],
-    birth_date,
+        calendario_data: Dict[str, Any],
+        birth_date,
 ) -> Optional[Tuple[int, str, str]]:
     """
     Retorna (numero_tonal, signo, veintena) para la fecha dada.
@@ -81,7 +82,7 @@ def find_nemontemi_day(calendario_nemontemi_data, tlalpilli, birth_date):
 #  Inicios de trecena y búsqueda
 # ──────────────────────────────
 def encontrar_inicios_de_trecenas(
-    calendario_data: Dict[str, Any]
+        calendario_data: Dict[str, Any]
 ) -> List[Tuple[int, str, str, str]]:
     """
     Devuelve lista de (numero_tonal, signo, veintena, fecha_dd/mm) para los 20
@@ -103,7 +104,7 @@ def encontrar_inicios_de_trecenas(
 
 
 def encontrar_trecena_de_fecha(
-    birth_date, calendario_data: Dict[str, Any]
+        birth_date, calendario_data: Dict[str, Any]
 ) -> Optional[Tuple[int, int, str, str, str]]:
     inicios = encontrar_inicios_de_trecenas(calendario_data)
     for i, (_, _, _, fecha_inicio) in enumerate(inicios):

@@ -10,7 +10,7 @@ def generar_json_completo() -> dict:
 
     # ── Datos base ──────────────────────────────────────────────
     signos = base["tonalpohualli_simbolos"]
-    numeros_nahuas = base["numeros"]
+    numeros_nahuas = base["NUMEROS"]
     xiuh_meses = base["xiuhpohualli_meses"]
     rumbos = base["RUMBOS_TONAL"]  # ← 4 rumbos
     nemontemi = base["nemontemi"]
